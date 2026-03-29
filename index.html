@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>קבוצות קיבוץ ארז – חידת הסדר</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #fffdf8;
+    --border: #d4c9b0;
+    --text: #2a2318;
+    --muted: #8a7d68;
+    --accent: #c17f3a;
+    --accent-light: #f5e6d0;
+    --green: #4a7c59;
+    --green-light: #dff0e3;
+    --red: #9b3a3a;
+    --wa: #25D366;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; direction: rtl; }
+
+  header { background: var(--text); color: var(--bg); padding: 1rem 1.25rem 0.875rem; text-align: center; position: sticky; top: 0; z-index: 100; }
+  header h1 { font-size: 17px; font-weight: 700; }
+  header p { font-size: 12px; opacity: 0.65; margin-top: 2px; font-weight: 300; }
+  .progress-bar { height: 3px; background: rgba(255,255,255,0.15); }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 0.3s ease; width: 0%; }
+
+  .status-strip { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
+  .status-strip strong { color: var(--text); font-weight: 500; }
+
+  .main { padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .instructions { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .instructions strong { color: var(--text); }
+
+  .section-label { font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+
+  .bank-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip { padding: 7px 14px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; font-size: 14px; color: var(--text); cursor: pointer; transition: all 0.15s; user-select: none; font-family: 'Heebo', sans-serif; }
+  .chip:active { transform: scale(0.95); }
+  .chip.selected { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 500; box-shadow: 0 0 0 3px rgba(193,127,58,0.15); }
+
+  .timeline-hint { font-size: 12px; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .timeline-hint::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .timeline { display: flex; flex-direction: column; gap: 5px; position: relative; }
+  .timeline::before { content: ''; position: absolute; right: 22px; top: 12px; bottom: 12px; width: 2px; background: var(--border); z-index: 0; }
+
+  .slot-row { display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
+  .slot-num { width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; color: var(--muted); flex-shrink: 0; }
+  .slot-num.filled { background: var(--text); border-color: var(--text); color: var(--bg); }
+
+  .slot-box { flex: 1; min-height: 38px; border-radius: 10px; border: 1.5px dashed var(--border); background: transparent; display: flex; align-items: center; padding: 0 12px; cursor: pointer; transition: all 0.15s; font-size: 14px; color: var(--muted); position: relative; }
+  .slot-box.target { border-style: solid; border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(193,127,58,0.2); color: var(--accent); font-size: 12px; }
+  .slot-box.filled-slot { border-style: solid; border-color: var(--border); background: var(--surface); color: var(--text); }
+
+  .remove-btn { position: absolute; left: 8px; width: 20px; height: 20px; border-radius: 50%; background: var(--border); border: none; color: var(--muted); font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: inherit; padding: 0; }
+  .remove-btn:active { transform: scale(0.9); }
+
+  .btn-row { display: flex; gap: 8px; }
+  .btn { flex: 1; padding: 12px 8px; border-radius: 10px; font-size: 14px; font-weight: 500; font-family: 'Heebo', sans-serif; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+  .btn:active { transform: scale(0.97); }
+  .btn.reset { border-color: var(--red); color: var(--red); }
+  .btn.wa { background: var(--wa); color: white; border-color: var(--wa); font-size: 15px; }
+  .btn.wa:disabled { opacity: 0.4; cursor: default; }
+
+  .result-banner { border-radius: 12px; padding: 1rem; text-align: center; font-size: 15px; font-weight: 500; }
+  .result-banner .sub-result { font-size: 12px; font-weight: 300; margin-top: 4px; opacity: 0.8; }
+
+  @media (min-width: 480px) { .main { max-width: 480px; margin: 0 auto; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>קבוצות קיבוץ ארז</h1>
+  <p>סדרו את הקבוצות בסדר כרונולוגי</p>
+  <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+</header>
+
+<div class="status-strip">
+  <span>מוצבות: <strong id="placed-count">0</strong> / 35</span>
+</div>
+
+<div class="main">
+  <div class="instructions">
+    <strong>איך משחקים:</strong><br>
+    הקישו על קבוצה מהרשימה למטה → היא תיסמן.<br>
+    אחר כך הקישו על המשבצת הרצויה בציר → היא תיכנס לשם.<br>
+    כדי להחזיר קבוצה לרשימה, הקישו על ✕ בצד המשבצת.
+  </div>
+
+  <div>
+    <div class="section-label">בנק קבוצות</div>
+    <div class="bank-grid" id="bank"></div>
+  </div>
+
+  <div>
+    <div class="section-label">הציר הכרונולוגי</div>
+    <div class="timeline-hint">ראשונה למעלה, אחרונה למטה</div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn reset" onclick="resetGame()">התחלה מחדש</button>
+    <button class="btn wa" id="wa-btn" onclick="shareWA()" disabled>📤 סיימתי! שתף</button>
+  </div>
+
+  <div id="banner"></div>
+</div>
+
+<script>
+const GROUPS = [
+  {name:"רימון",year:1966},
+  {name:"תמר",year:1969},
+  {name:"גפן",year:1972},
+  {name:"זית",year:1975},
+  {name:"שיבולת",year:1978},
+  {name:"חצב",year:1981},
+  {name:"כלנית",year:1983},
+  {name:"נרקיס",year:1985},
+  {name:"צבר",year:1987},
+  {name:"ברוש",year:1989},
+  {name:"שיר",year:1991},
+  {name:"דקל",year:1993},
+  {name:"אורן",year:1995},
+  {name:"דובדבן",year:1996},
+  {name:"שמש",year:1997},
+  {name:"קקטוס 1",year:1998},
+  {name:"תות",year:1999},
+  {name:"אגוז 1",year:2000},
+  {name:"אשל",year:2001},
+  {name:"גויבה",year:2002},
+  {name:"רקפת",year:2004},
+  {name:"צנובר",year:2005},
+  {name:"פיסטוק",year:2006},
+  {name:"קוקוס",year:2007},
+  {name:"ליצ'י",year:2008},
+  {name:"פקאן",year:2009},
+  {name:"צבעוני",year:2010},
+  {name:"אנונה",year:2011},
+  {name:"פטל",year:2013},
+  {name:"אננס",year:2014},
+  {name:"אגוז 2",year:2016},
+  {name:"לוטוס",year:2018},
+  {name:"קקטוס 2",year:2019},
+  {name:"רותם",year:2020},
+  {name:"אירוס",year:2021},
+  {name:"חמניה",year:2022},
+  {name:"פיטנגו",year:2023},
+  {name:"תלתן",year:2024},
+  {name:"מייפל",year:2025}
+];
+
+let slotData = Array(GROUPS.length).fill(null);
+let bankNames = [];
+let selected = null;
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+function resetGame(){
+  slotData = Array(GROUPS.length).fill(null);
+  bankNames = shuffle(GROUPS.map(g=>g.name));
+  selected = null;
+  document.getElementById('banner').innerHTML='';
+  document.getElementById('wa-btn').disabled = true;
+  render();
+}
+
+function render(){
+  renderBank();
+  renderTimeline();
+  updateStatus();
+}
+
+function renderBank(){
+  const bank = document.getElementById('bank');
+  bank.innerHTML='';
+  const visible = bankNames.filter(Boolean);
+  if(visible.length===0){
+    bank.innerHTML='<span style="font-size:13px;color:var(--muted)">כל הקבוצות הוצבו!</span>';
+    document.getElementById('wa-btn').disabled = false;
+    return;
+  }
+  visible.forEach(name=>{
+    const c = document.createElement('button');
+    c.className='chip'+(selected===name?' selected':'');
+    c.textContent=name;
+    c.onclick=()=>selectChip(name);
+    bank.appendChild(c);
+  });
+  document.getElementById('wa-btn').disabled = true;
+}
+
+function selectChip(name){
+  selected = (selected===name) ? null : name;
+  renderBank();
+  renderTimeline();
+}
+
+function renderTimeline(){
+  const tl = document.getElementById('timeline');
+  tl.innerHTML='';
+  GROUPS.forEach((_,i)=>{
+    const row = document.createElement('div');
+    row.className='slot-row';
+
+    const num = document.createElement('div');
+    num.className='slot-num'+(slotData[i]?' filled':'');
+    num.textContent=i+1;
+
+    const box = document.createElement('div');
+    box.className='slot-box';
+
+    if(slotData[i]){
+      box.classList.add('filled-slot');
+      box.textContent=slotData[i];
+      const rm = document.createElement('button');
+      rm.className='remove-btn';
+      rm.textContent='✕';
+      rm.onclick=(e)=>{e.stopPropagation();removeFromSlot(i);};
+      box.appendChild(rm);
+      box.onclick=()=>swapIntoSlot(i);
+    } else {
+      if(selected){
+        box.classList.add('target');
+        box.textContent='הנח כאן';
+      }
+      box.onclick=()=>placeInSlot(i);
+    }
+
+    row.appendChild(num);
+    row.appendChild(box);
+    tl.appendChild(row);
+  });
+}
+
+function placeInSlot(idx){
+  if(!selected) return;
+  if(slotData[idx]) return swapIntoSlot(idx);
+  slotData[idx]=selected;
+  bankNames[bankNames.indexOf(selected)]=null;
+  selected=null;
+  render();
+}
+
+function swapIntoSlot(idx){
+  if(!selected) return;
+  const displaced=slotData[idx];
+  slotData[idx]=selected;
+  bankNames[bankNames.indexOf(selected)]=displaced;
+  selected=null;
+  render();
+}
+
+function removeFromSlot(idx){
+  const name=slotData[idx];
+  slotData[idx]=null;
+  const emptyIdx=bankNames.indexOf(null);
+  if(emptyIdx>=0) bankNames[emptyIdx]=name;
+  else bankNames.push(name);
+  selected=null;
+  render();
+}
+
+function updateStatus(){
+  const placed=slotData.filter(Boolean).length;
+  document.getElementById('placed-count').textContent=placed;
+  document.getElementById('prog').style.width=Math.round(placed/GROUPS.length*100)+'%';
+}
+
+function shareWA(){
+  const lines = slotData.map((name,i) => (i+1)+'. '+(name||'?')).join('\n');
+  const msg = '🌱 חידת קבוצות קיבוץ ארז – הסדר שלי:\n\n' + lines + '\n\nנסה גם אתה! szerez.github.io/EREZ-i-was-here-first';
+  const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+}
+
+resetGame();
+</script>
+</body>
+</html>
